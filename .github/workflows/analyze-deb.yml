@@ -16,10 +16,10 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4  # ✅ 升级到v4，消除Node.js警告
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5  # ✅ 升级到v5，消除Node.js警告
         with:
           python-version: '3.11'
 
@@ -27,7 +27,7 @@ jobs:
         run: |
           sudo apt update
           sudo apt install -y dpkg
-          pip3 install lief frida-tools  # ✅ 安装 LIEF 和 Frida CLI（如后续使用设备可启用）
+          pip3 install lief frida-tools
 
       - name: Prepare .deb
         run: mkdir -p work
@@ -54,10 +54,10 @@ jobs:
           chmod +x run_all.sh
           ./run_all.sh
 
-      - name: Commit and Push Results
-        run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@github.com"
-          git add output/
-          git commit -m "Auto: Add analysis result from workflow" || echo "Nothing to commit"
-          git push https://x-access-token:${{ secrets.PAT }}@github.com/${{ github.repository }} HEAD:main
+      # ✅ 新增：上传分析结果为Artifacts（直接下载，不需要Git权限）
+      - name: Upload Analysis Results
+        uses: actions/upload-artifact@v4
+        with:
+          name: analysis-result
+          path: output/
+          retention-days: 30  # 保留30天
